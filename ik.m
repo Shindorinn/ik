@@ -13,7 +13,7 @@ global ub_angle_prox   = pi/3;
 global ub_angle_inter  = 0;
 global ub_angle_distal = 0;
 
-global error_margin = 0.1;
+global error_margin = 0.001;
 
 
 % Clamp functions as expected
@@ -87,7 +87,7 @@ function K = assignment2()
   clf;
   hold on;
   axis([0,100,-3,100],"equal");
-  plot([0,65],[-2,-2]); % plots the line
+  plot([0,65],[-2,-2]);
   
   %forwardKinematics(0.4708, lb_angle_inter/2, lb_angle_distal)
   [X1, Y1] = forwardKinematics(0.98425, (-2*pi)/3, 0)
@@ -164,19 +164,20 @@ function [Xi,Yi] = inverseKinematics(currentAngleGuess, target)
   Xi = [];
   Yi = [];
 
-  distalJoint =  2*currentAngleGuess(2)/3;
   i = 0;
   do
     i = i+1;
+    distalJoint =  2*currentAngleGuess(2)/3;
     [X, Y] = forwardKinematics(currentAngleGuess(1), currentAngleGuess(2), distalJoint);
     Xi = vertcat(Xi,X);
     Yi = vertcat(Yi,Y);
     inv_J_q = calcInvJacobian(len_prox, len_inter, len_distal, currentAngleGuess(1), currentAngleGuess(2));
     currentAngleGuess = currentAngleGuess + inv_J_q*( target - [X(4);Y(4)] );
     error = sqrt( (target(1)-X(4))^2 + (target(2)-Y(4))^2 );
-  until((error<error_margin && Y(4)>-2) || i>=20);
+  until((error<=error_margin && Y(4)>-2) || i>=100);
   
   i = i+1;
+  distalJoint =  2*currentAngleGuess(2)/3;
   [X, Y] = forwardKinematics(currentAngleGuess(1), currentAngleGuess(2), distalJoint);
   
   Xi = vertcat(Xi,X);
@@ -203,6 +204,7 @@ function K = assignment5and6()
   clf;
   hold on;
   axis([0,100,-3,100],"equal");
+  plot([0,100],[-2,-2],'color','r');
   
   target = transpose([len_prox + len_inter + 10, -2]);
   plot(target(1), target(2),'marker','x','markersize',30,'color','r');
@@ -247,8 +249,7 @@ function assignment7()
   img7 = figure(7);
   clf;
   hold on;
-  axis([0,100,-3,100],"equal");
-  
+  axis([0,100,-3,40],"equal");
   plot([0,100],[-2,-2],'color','r');
   
   dist  = len_prox+len_inter+len_distal;
@@ -262,7 +263,46 @@ function assignment7()
   anglediffq = atan(Yt(4)/Xt(4));
   
   [Xc,Yc] = forwardKinematics(angleq-anglediffq,lb_angle_inter,(2/3)*lb_angle_inter);
-  plot(Xc,Yc,'marker','x');
+  plot(Xc,Yc,'marker','o');
+  
+  hold off;
+endfunction
+
+function assignment8()
+    global len_prox;
+  global len_inter;
+  global len_distal;
+  global lb_angle_prox;
+  global lb_angle_inter;
+  global lb_angle_distal;
+  global ub_angle_prox;
+  global ub_angle_inter;
+  global ub_angle_distal;
+
+  img8 = figure(8);
+  clf;
+  hold on;
+  axis([0,100,-3,40],"equal");
+  plot([0,100],[-2,-2],'color','r');
+  
+  [X1,Y1] = inverseKinematics([ub_angle_prox,ub_angle_inter],[60;-2]);
+
+  s = rows(X1);
+  plot([X1(s,1),X1(s,2),X1(s,3),X1(s,4)],
+       [Y1(s,1),Y1(s,2),Y1(s,3),Y1(s,4)],
+       'marker','x');
+  
+%  prev = [TODO];
+%  for i=50:10:80
+%    [X,Y] = inverseKinematics(prev,[i,-2]);
+%    z = rows(X);
+%    for j=1:z
+%      plot([X(j,1),X(j,2),X(j,3),X(j,4)],
+%           [Y(j,1),Y(j,2),Y(j,3),Y(j,4)],
+%           'marker','o');
+%    endfor
+%    prev = [X(z,4);Y(z,4)];
+%  endfor
   
   hold off;
 endfunction
@@ -270,7 +310,8 @@ endfunction
 %assignment2()
 %assignment3()
 %assignment5and6()
-assignment7()
+%assignment7()
+assignment8()
 
 %len_prox, len_inter, len_distal, lb_angle_prox, lb_angle_inter, lb_angle_distal, ub_angle_prox, ub_angle_inter, ub_angle_distal
 %
