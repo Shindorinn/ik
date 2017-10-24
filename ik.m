@@ -42,7 +42,7 @@ function inv_j = calcInvJacobian(len_prox, len_inter, len_distal, angle_prox, an
 
 endfunction
 
-function K = forwardKinematics(angle_prox, angle_inter, angle_distal)
+function [X,Y] = forwardKinematics(angle_prox, angle_inter, angle_distal)
   global len_prox;
   global len_inter;
   global len_distal; 
@@ -62,10 +62,9 @@ function K = forwardKinematics(angle_prox, angle_inter, angle_distal)
   T3 = rotateJoint(angle_distal, len_distal,lb_angle_distal, ub_angle_distal);
   j1 = T1;
   j2 = T1*T2;
-  tip= T1*T2*T3
-  plot([0,j1(1,4),j2(1,4),tip(1,4)],
-       [0,j1(2,4),j2(2,4),tip(2,4)],
-       'marker','o');
+  tip= T1*T2*T3;
+  X = [0,j1(1,4),j2(1,4),tip(1,4)];
+  Y = [0,j1(2,4),j2(2,4),tip(2,4)];
 endfunction
 
 function K = assignment2()
@@ -91,9 +90,10 @@ function K = assignment2()
   plot([0,65],[-2,-2]); % plots the line
   
   %forwardKinematics(0.4708, lb_angle_inter/2, lb_angle_distal)
-  forwardKinematics(0.98425, (-2*pi)/3, 0)
-  forwardKinematics(0.4835, -1.15157, (-2*pi)/3)
-    
+  [X1, Y1] = forwardKinematics(0.98425, (-2*pi)/3, 0)
+  [X2, Y2] = forwardKinematics(0.4835, -1.15157, (-2*pi)/3)
+  plot( X1, Y1);
+  plot( X2, Y2);
   hold off;  
   
 endfunction
@@ -120,16 +120,30 @@ function K = assignment3()
   axis([0,100,-100,100],"equal");
   
   for i=lb_angle_prox:0.1:ub_angle_prox
-    forwardKinematics(len_prox, len_inter, len_distal, i, ub_angle_inter, ub_angle_distal);
+    [X1, Y1] = forwardKinematics(i, ub_angle_inter, ub_angle_distal);
+    [X2, Y2] = forwardKinematics(i, lb_angle_inter, lb_angle_distal);
+     
+    plot( X1(4), Y1(4));
+    plot( X2(4), Y2(4));
   endfor
   
   for i=lb_angle_inter:0.1:ub_angle_inter
-    forwardKinematics(len_prox, len_inter, len_distal, lb_angle_prox, i, ub_angle_distal);
+    [X1, Y1] = forwardKinematics(lb_angle_prox, i, ub_angle_distal);
+    [X2, Y2] = forwardKinematics(ub_angle_prox, i, lb_angle_distal);
+     
+    plot( X1(4), Y1(4));
+    plot( X2(4), Y2(4));
   endfor
   
   for i=lb_angle_distal:0.1:ub_angle_distal
-    forwardKinematics(len_prox, len_inter, len_distal, lb_angle_prox, lb_angle_inter, i);
+    [X1, Y1] = forwardKinematics(lb_angle_prox, lb_angle_inter, i);
+    [X2, Y2] = forwardKinematics(ub_angle_prox, ub_angle_inter, i);
+     
+    plot( X1(4), Y1(4));
+    plot( X2(4), Y2(4));
   endfor
+  
+  
   
 %  for i = -pi/3:0.1:pi/3
 %    for j = -2*pi/3:0.1:2*pi/3
@@ -144,11 +158,8 @@ function K = assignment3()
   hold off;
 endfunction
 
-
-
-% TODO point 2.
 assignment2()
-%assignment3()
+assignment3()
 %len_prox, len_inter, len_distal, lb_angle_prox, lb_angle_inter, lb_angle_distal, ub_angle_prox, ub_angle_inter, ub_angle_distal
 %
 %origin = transpose([0,0,0,1]);
