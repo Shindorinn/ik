@@ -91,8 +91,8 @@ function K = assignment2()
   plot([0,65],[-2,-2]); % plots the line
   
   %forwardKinematics(0.4708, lb_angle_inter/2, lb_angle_distal)
-  forwardKinematics(0.981309, (-2*pi)/3, 0)
-  forwardKinematics(0.4822, -1.15157, (-2*pi)/3)
+  forwardKinematics(0.98425, (-2*pi)/3, 0)
+  forwardKinematics(0.4835, -1.15157, (-2*pi)/3)
     
   hold off;  
   
