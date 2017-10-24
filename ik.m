@@ -1,5 +1,5 @@
 1;
-
+% Clamp functions as expected
 function f = clamp(angle, min, max)
   f=angle;
   if(angle<min) f=min;
@@ -14,25 +14,25 @@ function T = rotateJoint(angle,length,lb,ub)
                  0,           0, 0,                 1];
 endfunction
 
-
-function inv_J_q = calcInvJacobian(target, 
+% Works as expected
+function inv_j = calcInvJacobian(target, 
   len_prox, len_inter, len_distal,
   angle_prox, angle_inter, angle_distal)
-  
-%  j = [-44.6*sin(theta1       )-26.3*sin(theta1+   theta2   ) - 17.4*sin(theta1+(2*theta2)/3), 
-%       -26.3*sin(theta1+theta2)-43.5*sin(theta1+(2*theta2)/3); 
-%        44.6*cos(theta1       )+26.3*cos(theta1+   theta2   ) + 17.4*(cos(theta1+(2*theta2)/3)), 
-%        26.3*cos(theta1+theta2)+17.4*cos(theta1+(2*theta2)/3)];
-  
-  a = -len_prox *sin(angle_prox               ) - len_inter  * sin(angle_prox +      angle_inter ) - len_distal * sin( angle_prox + ((2*angle_inter)/3)  );
-  b = -len_inter*sin(angle_prox + angle_inter ) - len_distal * sin(angle_prox + (2*angle_inter)/3);
-  c =  len_prox *cos(angle_prox               ) + len_inter  * cos(angle_prox +      angle_inter ) + len_distal * cos( angle_prox + ((2*angle_inter)/3)  );
-  d =  len_inter*cos(angle_prox + angle_inter ) + len_distal * cos(angle_prox + (2*angle_inter)/3);
+  theta1 = angle_prox;
+  theta2 = angle_inter;
+  j = [-44.6*sin(theta1       )-26.3*sin(theta1+      theta2)-17.4*sin(theta1+(5/3)*theta2), -26.3*sin(theta1+theta2)-43.5*sin(theta1+(5/3)*theta2);
+        44.6*cos(theta1       )+26.3*cos(theta1+      theta2)+17.4*cos(theta1+(5/3)*theta2),  26.3*cos(theta1+theta2)+17.4*cos(theta1+(5/3)*theta2)]
+%  a = -len_prox *sin(angle_prox               ) - len_inter  * sin(angle_prox +       angle_inter) - len_distal * sin( angle_prox + (5/3)*angle_inter );
+%  b = -len_inter*sin(angle_prox + angle_inter ) - len_distal * sin(angle_prox + (5/3)*angle_inter);
+%  c =  len_prox *cos(angle_prox               ) + len_inter  * cos(angle_prox +       angle_inter) + len_distal * cos( angle_prox + (5/3)*angle_inter );
+%  d =  len_inter*cos(angle_prox + angle_inter ) + len_distal * cos(angle_prox + (5/3)*angle_inter);
 
-  J_q = [ a, b;
-          c, d];
-
-  inv_J_q = (1/(a*d-b*c))*[d,-b;-c,a];
+  
+  D = j(1,1)* j(2,2) - j(1,2)*j(2,1);
+  inv_j = (1/D) * [j(2,2), -1*j(1,2); -1*j(2,1), j(1,1)];
+  %J_q = [ a, b;
+  %        c, d];
+  %inv_J_q = (1/(a*d-b*c))*[d,-b;-c,a];
 
 endfunction
 
@@ -42,11 +42,6 @@ img = figure(1);
 clf;
 hold on;
 axis([0,100,-100,100],"equal");
-
-% Restrictions TODO : Triple-check the restrictions
-% -pi / 3 <= Theta_M <= pi /3
-% -2 pi / 3 <= Theta_P <= 0
-% -2 pi / 3 <= Theta _D <= 0
 
 global len_prox = 44.6;
 global len_inter = 26.3;
@@ -89,7 +84,7 @@ plot([0,65],[-2,-2]);
 %len_prox
 %len_inter+len_distal
 
-target = transpose([len_prox + len_inter, -2]);
+target = transpose([len_prox + len_inter + 10, -2]);
 plot(target(1), target(2),
      'marker','x','markersize',40,'color','r');
 
@@ -107,19 +102,30 @@ do
   j1 = T01;
   j2 = T01*T12;
   tip= T01*T12*T23;
-  no_the_real_tip = [tip(1,4);tip(2,4)]
-  tipsy(i) = no_the_real_tip(2);
-  tipsx(i) = no_the_real_tip(1);
+  
+  tipsx(i) = tip(1,4);
+  tipsy(i) = tip(2,4);
+  
+  theta1 = clamp(currentAngleGuess(1), lb_angle_prox, ub_angle_prox);
+  theta2 = clamp(currentAngleGuess(2), lb_angle_inter, ub_angle_inter);
+  theta3 = (2*theta2)/3
+
+  a = tip(1,4)
+  b = tip(2,4)
+
+  x = l1*cos(theta1) + l3*cos((2*theta2)/3)*(cos(theta1)*cos(theta2) - sin(theta1)*sin(theta2)) - l3*sin((2*theta2)/3)*(cos(theta1)*sin(theta2) + cos(theta2)*sin(theta1)) + l2*cos(theta1)*cos(theta2) - l2*sin(theta1)*sin(theta2) 
+  y = l1*sin(theta1) + l3*cos((2*theta2)/3)*(cos(theta1)*sin(theta2) + cos(theta2)*sin(theta1)) + l3*sin((2*theta2)/3)*(cos(theta1)*cos(theta2) - sin(theta1)*sin(theta2)) + l2*cos(theta1)*sin(theta2) + l2*cos(theta2)*sin(theta1)
+
 
   plot([0,j1(1,4),j2(1,4),tip(1,4)],
        [0,j1(2,4),j2(2,4),tip(2,4)],
        'marker','o','color','k');
        
   inv_J_q = calcInvJacobian(target, len_prox, len_inter, len_distal, currentAngleGuess(1), currentAngleGuess(2), distalJoint);
-  currentAngleGuess = currentAngleGuess + inv_J_q*( target - no_the_real_tip );
+  currentAngleGuess = currentAngleGuess + inv_J_q*( target - [tip(1,4);tip(2,4)] );
   
-  error = sqrt( (target(1)-no_the_real_tip(1))^2 + (target(2)-no_the_real_tip(2))^2 );
-until((error<error_margin && no_the_real_tip(2)>-2) || i>100);
+  error = sqrt( (target(1)-tip(1,4))^2 + (target(2)-tip(2,4))^2 );
+until((error<error_margin && tip(2,4)>-2) || i>10);
 
 i = i+1;
 
@@ -130,14 +136,30 @@ T23 = rotateJoint(distalJoint,          len_distal,lb_angle_distal, ub_angle_dis
 j1 = T01;
 j2 = T01*T12;
 tip= T01*T12*T23;
-tipsy(i) = tip(2);
-tipsx(i) = tip(1);
-plot([0,j1(1,4),j2(1,4),tip(1,4)],
-     [0,j1(2,4),j2(2,4),tip(2,4)],
-     'marker','o','color','b');
+tipsy(i) = tip(2,4);
+tipsx(i) = tip(1,4);
+  plot([0,j1(1,4),j2(1,4),tip(1,4)],
+       [0,j1(2,4),j2(2,4),tip(2,4)],
+       'marker','o','color','b');
 
 
 plot(tipsx,tipsy,'linestyle','-.','color','r');
+
+l1 = 44.6;
+l2 = 26.3;
+l3 = 17.4;
+
+theta1 = clamp(currentAngleGuess(1), lb_angle_prox, ub_angle_prox);
+theta2 = clamp(currentAngleGuess(2), lb_angle_inter, ub_angle_inter);
+theta3 = (2*theta2)/3
+
+a = tip(1,4)
+b = tip(2,4)
+
+x = l1*cos(theta1) + l3*cos((2*theta2)/3)*(cos(theta1)*cos(theta2) - sin(theta1)*sin(theta2)) - l3*sin((2*theta2)/3)*(cos(theta1)*sin(theta2) + cos(theta2)*sin(theta1)) + l2*cos(theta1)*cos(theta2) - l2*sin(theta1)*sin(theta2) 
+y = l1*sin(theta1) + l3*cos((2*theta2)/3)*(cos(theta1)*sin(theta2) + cos(theta2)*sin(theta1)) + l3*sin((2*theta2)/3)*(cos(theta1)*cos(theta2) - sin(theta1)*sin(theta2)) + l2*cos(theta1)*sin(theta2) + l2*cos(theta2)*sin(theta1)
+
+
 
 %origin = transpose([0,0,0,1]);
 %joint0 = T01*origin;
