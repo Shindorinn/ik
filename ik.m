@@ -86,7 +86,7 @@ function K = assignment2()
   img = figure(2);
   clf;
   hold on;
-  axis([0,100,-3,100],"equal");
+  axis("equal");
   plot([0,65],[-2,-2]);
   
   %forwardKinematics(0.4708, lb_angle_inter/2, lb_angle_distal)
@@ -94,6 +94,8 @@ function K = assignment2()
   [X2, Y2] = forwardKinematics(0.4835, -1.15157, (-2*pi)/3)
   plot( X1, Y1);
   plot( X2, Y2);
+  tip1 = [X1(4);Y1(4)]
+  tip2 = [X2(4);Y2(4)]
   hold off;  
   
 endfunction
@@ -117,31 +119,59 @@ function K = assignment3()
   img2 = figure(3);
   clf;
   hold on;
-  axis([0,100,-100,100],"equal");
+  axis("equal");
   
-  for i=lb_angle_prox:0.1:ub_angle_prox
+  XP1 = [];
+  YP1 = [];
+  XP2 = [];
+  YP2 = [];
+  for i=lb_angle_prox:0.1:ub_angle_prox+0.1
     [X1, Y1] = forwardKinematics(i, ub_angle_inter, ub_angle_distal);
     [X2, Y2] = forwardKinematics(i, lb_angle_inter, lb_angle_distal);
-     
-    plot( X1(4), Y1(4));
-    plot( X2(4), Y2(4));
+    XP1 = horzcat(XP1,X1(4));
+    YP1 = horzcat(YP1,Y1(4));
+    XP2 = horzcat(XP2,X2(4));
+    YP2 = horzcat(YP2,Y2(4));
+    %plot( X1(4), Y1(4));
+    %plot( X2(4), Y2(4));
   endfor
+  plot(XP1,YP1);
+  plot(XP2,YP2);
   
-  for i=lb_angle_inter:0.1:ub_angle_inter
+  XP1 = [];
+  YP1 = [];
+  XP2 = [];
+  YP2 = [];
+  for i=lb_angle_inter:0.1:ub_angle_inter+0.1
     [X1, Y1] = forwardKinematics(lb_angle_prox, i, ub_angle_distal);
     [X2, Y2] = forwardKinematics(ub_angle_prox, i, lb_angle_distal);
-     
-    plot( X1(4), Y1(4));
-    plot( X2(4), Y2(4));
+    XP1 = horzcat(XP1,X1(4));
+    YP1 = horzcat(YP1,Y1(4));
+    XP2 = horzcat(XP2,X2(4));
+    YP2 = horzcat(YP2,Y2(4));
+    %plot( X1(4), Y1(4));
+    %plot( X2(4), Y2(4));
   endfor
+  plot(XP1,YP1);
+  plot(XP2,YP2);
   
-  for i=lb_angle_distal:0.1:ub_angle_distal
+  XP1 = [];
+  YP1 = [];
+  XP2 = [];
+  YP2 = [];
+  for i=lb_angle_distal:0.1:ub_angle_distal+0.1
     [X1, Y1] = forwardKinematics(lb_angle_prox, lb_angle_inter, i);
     [X2, Y2] = forwardKinematics(ub_angle_prox, ub_angle_inter, i);
-     
-    plot( X1(4), Y1(4));
-    plot( X2(4), Y2(4));
+    XP1 = horzcat(XP1,X1(4));
+    YP1 = horzcat(YP1,Y1(4));
+    XP2 = horzcat(XP2,X2(4));
+    YP2 = horzcat(YP2,Y2(4));
+    %plot( X1(4), Y1(4));
+    %plot( X2(4), Y2(4));
   endfor
+  plot(XP1,YP1);
+  plot(XP2,YP2);
+  
   
   hold off;
 endfunction
@@ -203,7 +233,7 @@ function K = assignment5and6()
   img2 = figure(5);
   clf;
   hold on;
-  axis([0,100,-3,100],"equal");
+  axis("equal");
   plot([0,100],[-2,-2],'color','r');
   
   target = transpose([len_prox + len_inter + 10, -2]);
@@ -249,7 +279,7 @@ function assignment7()
   img7 = figure(7);
   clf;
   hold on;
-  axis([0,100,-3,40],"equal");
+  axis("equal");
   plot([0,100],[-2,-2],'color','r');
   
   dist  = len_prox+len_inter+len_distal;
@@ -269,7 +299,7 @@ function assignment7()
 endfunction
 
 function assignment8()
-    global len_prox;
+  global len_prox;
   global len_inter;
   global len_distal;
   global lb_angle_prox;
@@ -282,7 +312,7 @@ function assignment8()
   img8 = figure(8);
   clf;
   hold on;
-  axis([0,100,-3,40],"equal");
+  axis("equal");
   plot([0,100],[-2,-2],'color','r');
   
   [X1,Y1] = inverseKinematics([ub_angle_prox,ub_angle_inter],[60;-2]);
@@ -307,11 +337,11 @@ function assignment8()
   hold off;
 endfunction
 
-%assignment2()
+assignment2()
 %assignment3()
 %assignment5and6()
 %assignment7()
-assignment8()
+%assignment8()
 
 %len_prox, len_inter, len_distal, lb_angle_prox, lb_angle_inter, lb_angle_distal, ub_angle_prox, ub_angle_inter, ub_angle_distal
 %
