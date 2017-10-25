@@ -98,11 +98,11 @@ function [ r_theta1, r_theta2 ] = InverseKinematicsSolver( s_theta1, s_theta2, i
 % plot(x,y);
 % hold off;
 
-%  destinationPoints = [ 86,    70,    60,    50,    40,    30;
-%                        -1.95, -1.95, -1.95, -1.95, -1.95, -1.95;   ]
+  destinationPoints = [   85, 80,   75,    70,    65,    60,    55,    50,    45,    40,   35,  30;
+                       -1.95, -1.95, -1.95, -1.95, -1.95, -1.95, -1.95, -1.95, -1.95, -1.95, -1.95, -1.95;   ]
 
-  destinationPoints = [ 86,    70,    60,    50,    40,    30;
-                        -2, -2, -2, -2, -2, -2;   ]
+%  destinationPoints = [ 86,    70,    60,    50,    40,    30;
+%                        -2, -2, -2, -2, -2, -2;   ]
                     
   lastQ = [s_theta1 ; s_theta2;];
 

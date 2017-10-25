@@ -312,6 +312,7 @@ function assignment8()
   img8 = figure(8);
   clf;
   hold on;
+
   axis("equal");
   plot([0,100],[-2,-2],'color','r');
   
@@ -338,6 +339,7 @@ function assignment8()
 endfunction
 
 assignment2()
+<<<<<<< Updated upstream
 %assignment3()
 %assignment5and6()
 %assignment7()
